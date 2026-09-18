@@ -1,0 +1,41 @@
+volumes/
+__pycache__/
+*.pyc
+.DS_Store
+# Fichiers ingérés par NiFi (ne pas versionner les données de TP)
+nifi/input/*
+!nifi/input/.gitkeep
+# Sorties du flux NiFi (PutFile) et dépot des failure : meme raison
+nifi/output/*
+!nifi/output/.gitkeep
+nifi/errors/*
+!nifi/errors/.gitkeep
+# Login NiFi : secret local, seul .env.example est versionné
+nifi/credentials.env
+# Runtime Hive : /home du master est le bind mount de scripts/master/
+metastore_db/
+hiveserver2.log
+derby.log
+
+# Logs runtime du master (bind mount scripts/master/ -> /home)
+schematool.log
+
+# Artefacts archivés lors des nettoyages du master (scripts/reset_master.ps1)
+archives/
+scripts/master/*_year.py
+scripts/master/broken_mapper.py
+scripts/master/run_*.sh
+scripts/master/*valid*.sql
+scripts/master/last_valid*.sql
+scripts/master/hb_test.py
+scripts/master/biblio.hb
+scripts/master/biblio.out
+scripts/master/compare_tsv.sh
+scripts/master/move_tsv.sh
+scripts/master/list.hb
+scripts/master/list.out
+scripts/master/pathtest.sh
+scripts/master/spotify-clean.tsv
+scripts/master/broken-job.log
+scripts/master/*.out
+scripts/master/Spotify_Most_Streamed_Songs.csv

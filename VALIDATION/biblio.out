@@ -1,0 +1,82 @@
+SLF4J: Class path contains multiple SLF4J bindings.
+SLF4J: Found binding in [jar:file:/opt/hbase/lib/client-facing-thirdparty/log4j-slf4j-impl-2.25.4.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+SLF4J: Found binding in [jar:file:/opt/hadoop/share/hadoop/common/lib/slf4j-reload4j-1.7.36.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+SLF4J: See http://www.slf4j.org/codes.html#multiple_bindings for an explanation.
+SLF4J: Actual binding is of type [org.apache.logging.slf4j.Log4jLoggerFactory]
+hbase:001:0> create 'bibliotheque', 'auteur', 'livre'
+Created table bibliotheque
+Took 1.3553 seconds
+=> Hbase::Table - bibliotheque
+hbase:002:0> put 'bibliotheque', 'vhugo', 'auteur:nom', 'Hugo'
+Took 0.2475 seconds
+hbase:003:0> put 'bibliotheque', 'vhugo', 'auteur:prenom', 'Victor'
+Took 0.0075 seconds
+hbase:004:0> put 'bibliotheque', 'vhugo', 'livre:titre', 'La légende des siècles'
+Took 0.0053 seconds
+hbase:005:0> put 'bibliotheque', 'vhugo', 'livre:categ', 'Poèmes'
+Took 0.0053 seconds
+hbase:006:0> put 'bibliotheque', 'vhugo', 'livre:date', '1855'
+Took 0.0064 seconds
+hbase:007:0> put 'bibliotheque', 'jverne', 'auteur:nom', 'Verne'
+Took 0.0420 seconds
+hbase:008:0> put 'bibliotheque', 'jverne', 'auteur:prenom', 'Jules'
+Took 0.0040 seconds
+hbase:009:0> put 'bibliotheque', 'jverne', 'livre:titre', 'Face au drapeau'
+Took 0.0044 seconds
+hbase:010:0> put 'bibliotheque', 'jverne', 'livre:categ', 'Roman'
+Took 0.0047 seconds
+hbase:011:0> put 'bibliotheque', 'jverne', 'livre:date', '1896'
+Took 0.0058 seconds
+hbase:012:0> scan 'bibliotheque'
+ROW  COLUMN+CELL
+ jverne column=auteur:nom, timestamp=2026-09-13T11:34:51.803, value=Verne
+ jverne column=auteur:prenom, timestamp=2026-09-13T11:34:51.816, value=Jules
+ jverne column=livre:categ, timestamp=2026-09-13T11:34:51.844, value=Roman
+ jverne column=livre:date, timestamp=2026-09-13T11:34:51.858, value=1896
+ jverne column=livre:titre, timestamp=2026-09-13T11:34:51.830, value=Face au drapeau
+ vhugo column=auteur:nom, timestamp=2026-09-13T11:34:51.633, value=Hugo
+ vhugo column=auteur:prenom, timestamp=2026-09-13T11:34:51.654, value=Victor
+ vhugo column=livre:categ, timestamp=2026-09-13T11:34:51.724, value=Po\xC3\xA8mes
+ vhugo column=livre:date, timestamp=2026-09-13T11:34:51.745, value=1855
+ vhugo column=livre:titre, timestamp=2026-09-13T11:34:51.704, value=La l\xC3\xA9gende des si\xC3\xA8cles
+2 row(s)
+Took 0.0956 seconds
+hbase:013:0> get 'bibliotheque', 'vhugo'
+COLUMN  CELL
+ auteur:nom timestamp=2026-09-13T11:34:51.633, value=Hugo
+ auteur:prenom timestamp=2026-09-13T11:34:51.654, value=Victor
+ livre:categ timestamp=2026-09-13T11:34:51.724, value=Po\xC3\xA8mes
+ livre:date timestamp=2026-09-13T11:34:51.745, value=1855
+ livre:titre timestamp=2026-09-13T11:34:51.704, value=La l\xC3\xA9gende des si\xC3\xA8cles
+1 row(s)
+Took 0.0537 seconds
+hbase:014:0> put 'bibliotheque', 'vhugo', 'livre:date', '2024'
+Took 0.0047 seconds
+hbase:015:0> delete 'bibliotheque', 'vhugo', 'livre:categ'
+Took 0.0274 seconds
+hbase:016:0> scan 'bibliotheque', { FILTER => "SingleColumnValueFilter('livre', 'date', >=, 'binary:2000')" }
+ROW  COLUMN+CELL
+ vhugo column=auteur:nom, timestamp=2026-09-13T11:34:51.633, value=Hugo
+ vhugo column=auteur:prenom, timestamp=2026-09-13T11:34:51.654, value=Victor
+ vhugo column=livre:date, timestamp=2026-09-13T11:34:52.076, value=2024
+ vhugo column=livre:titre, timestamp=2026-09-13T11:34:51.704, value=La l\xC3\xA9gende des si\xC3\xA8cles
+1 row(s)
+Took 0.1203 seconds
+hbase:017:0> deleteall 'bibliotheque', 'jverne'
+Took 0.0060 seconds
+hbase:018:0> scan 'bibliotheque'hbase:018:0> 
+ROW  COLUMN+CELL
+ vhugo column=auteur:nom, timestamp=2026-09-13T11:34:51.633, value=Hugo
+ vhugo column=auteur:prenom, timestamp=2026-09-13T11:34:51.654, value=Victor
+ vhugo column=livre:date, timestamp=2026-09-13T11:34:52.076, value=2024
+ vhugo column=livre:titre, timestamp=2026-09-13T11:34:51.704, value=La l\xC3\xA9gende des si\xC3\xA8cles
+1 row(s)
+Took 0.0213 seconds
+hbase:018:0> 
+HBase Shell
+Use "help" to get list of supported commands.
+Use "exit" to quit this interactive shell.
+For Reference, please visit: https://hbase.apache.org/docs/shell
+Version 2.5.15-hadoop3, r1489aab3675f848300fea0a9cfc42fc26428cb49, Thu Jun  4 11:26:14 PDT 2026
+Took 0.0031 seconds
+hbase:001:0> 

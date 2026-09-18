@@ -1,0 +1,12 @@
+# Normalisation LF : ce repo build une image Linux via Docker.
+# core.autocrlf=true (défaut Git for Windows) re-checkoute sinon en CRLF,
+# et le shebang "#!/bin/bash\r" rend l'entrypoint inexecutable ("no such
+# file or directory"). Ces regles imposent LF dans le repo ET au checkout.
+* text=auto eol=lf
+
+# Securite : ne jamais normaliser les binaires futurs (images, jars...)
+*.png binary
+*.jpg binary
+*.csv binary
+*.jar binary
+*.gz binary

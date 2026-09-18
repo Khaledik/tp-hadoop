@@ -1,0 +1,5 @@
+# Depot des relations `failure` cablees (TP 07, partie II.4).
+# Doit exister AVANT le premier `docker compose up -d` : cree par Docker, il
+# appartient a root et NiFi (utilisateur nifi) ne peut pas y ecrire -- la
+# demonstration « la donnee n'a pas disparu » echouerait pour une raison sans
+# rapport avec le flux. Contenu non versionne.

@@ -1,0 +1,145 @@
+services:
+  master:
+    container_name: hadoop-master
+    build:
+      context: .
+      dockerfile: Dockerfile.debian
+    image: hadoop-cluster-base:latest
+    hostname: hadoop-master
+    ports:
+      - "9870:9870"
+      - "8088:8088"
+      - "19888:19888"
+      - "16010:16010"
+      - "9000:9000"
+      - "9090:9090"
+      - "9091:9091"
+      - "10000:10000"
+      - "10002:10002"
+    volumes:
+      - hdfs-namenode:/data/hdfs/namenode
+      - zookeeper-data:/data/zookeeper
+      - ./src:/home/src
+      - ./scripts/master/:/home/
+      # Depotoir du flux NiFi (PutFile ecrit ici depuis son conteneur) :
+      # `hdfs dfs -moveFromLocal /home/staging/<fichier> ...` fonctionne
+      # donc depuis le master. Voir le service nifi.
+      - ./nifi/output:/home/staging
+      # Derby ne supporte pas les bind mounts Windows (verrous db.lck) :
+      # le metastore vit sur un volume Docker nommé, monté par-dessus /home.
+      - hive-metastore:/home/metastore_db
+    environment:
+      - ROLE=master
+    networks:
+      hadoop-net:
+        ipv4_address: 172.30.0.10
+    # 2.6g : 9 JVM sur le master (ZK, NN, SNN, RM, JobHistory, HMaster,
+    # Thrift, REST, HiveServer2) — 1.8g suffisait sans Hive.
+    mem_limit: 2.6g
+    cpus: 1.5
+
+  slave1:
+    container_name: hadoop-slave1
+    image: hadoop-cluster-base:latest
+    hostname: hadoop-slave1
+    ports:
+      - "8041:8042"
+    volumes:
+      - hdfs-datanode-1:/data/hdfs/datanode
+    environment:
+      - ROLE=slave
+    depends_on:
+      master:
+        condition: service_started
+    networks:
+      hadoop-net:
+        ipv4_address: 172.30.0.20
+    mem_limit: 0.8g
+    cpus: 1
+
+  slave2:
+    container_name: hadoop-slave2
+    image: hadoop-cluster-base:latest
+    hostname: hadoop-slave2
+    ports:
+      - "8042:8042"
+    volumes:
+      - hdfs-datanode-2:/data/hdfs/datanode
+    environment:
+      - ROLE=slave
+    depends_on:
+      master:
+        condition: service_started
+    networks:
+      hadoop-net:
+        ipv4_address: 172.30.0.30
+    mem_limit: 0.8g
+    cpus: 1
+
+  # NiFi : ingestion visuelle (séquence 07 du cours).
+  # Image officielle 2.x : HTTPS obligatoire (self-signed) sur 8443 — le
+  # navigateur demandera d'accepter le certificat une fois, PUIS affiche un
+  # écran de login (NiFi 2.x n'a plus de mode anonyme). Java 21 embarqué,
+  # client Hadoop 3.x compatible avec notre Hadoop 3.3.6.
+  # UI sur https://localhost:8443/nifi
+  #
+  # Le login est lu dans nifi/credentials.env (à créer une fois) :
+  #   cp nifi/credentials.env.example nifi/credentials.env
+  # ⚠ Sans ce fichier, l'image NÉGOCIE elle-même un couple aléatoire et
+  #   l'écrit dans `docker logs hadoop-nifi` ("Generated Username / Generated
+  #   Password") : il change à chaque recreation du conteneur, et un mot de
+  #   passe de moins de 12 caracteres est rejete pour la meme raison. D'ou le
+  #   couple fixe, et le fichier non versionne (convention : aucun secret en
+  #   dur dans git).
+  nifi:
+    container_name: hadoop-nifi
+    image: apache/nifi:2.11.0
+    hostname: hadoop-nifi
+    ports:
+      - "8443:8443"
+    environment:
+      - NIFI_WEB_HTTPS_PORT=8443
+      - NIFI_WEB_HTTPS_HOST=0.0.0.0
+    # Login de l'UI (SINGLE_USER_CREDENTIALS_*), lu dans un fichier local
+    # non versionne. `required: false` : le demarrage du cluster ne bloque pas
+    # si on ne l'a pas encore cree — mais alors NiFi choisit un mot de passe
+    # aleatoire, cf. le commentaire du service.
+    env_file:
+      - path: ./nifi/credentials.env
+        required: false
+    volumes:
+      # Répertoire d'entrée des fichiers à ingérer (TP : GetFile)
+      - ./nifi/input:/opt/nifi/input
+      # Sorties du flux (TP : PutFile). L'image apache/nifi 2.x n'embarque
+      # AUCUN bundle Hadoop (verifie : 117 NAR, 0 NAR hdfs), PutHDFS n'y
+      # existe pas. Le flux s'arrete donc a PutFile, et c'est le terminal qui
+      # pousse le fichier dans HDFS avec `hdfs dfs -moveFromLocal` — c'est
+      # aussi ce que l'on montre au TP 05. Le montage est visible du master
+      # (./nifi/output -> /home/staging) pour que la commande fonctionne.
+      - ./nifi/output:/opt/nifi/output
+      # Relations failure cablées (TP : rien ne doit disparaitre)
+      - ./nifi/errors:/opt/nifi/errors
+      # Configuration Hadoop du cluster (copiée depuis config/, voir README)
+      - ./nifi/hadoop:/opt/nifi/hadoop
+    networks:
+      hadoop-net:
+        ipv4_address: 172.30.0.40
+    mem_limit: 1g
+    cpus: 1
+    depends_on:
+      master:
+        condition: service_started
+
+volumes:
+  hdfs-namenode:
+  hdfs-datanode-1:
+  hdfs-datanode-2:
+  zookeeper-data:
+  hive-metastore:
+
+networks:
+  hadoop-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.30.0.0/16

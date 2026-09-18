@@ -1,0 +1,26 @@
+# Scripts de démarrage - ordre d'exécution
+
+Chaque script démarre un service indépendant. L'ordre ci-dessous respecte les dépendances entre services.
+
+| Étape | Script | Service activé | Dépendances |
+|-------|--------|----------------|-------------|
+| 1 | `start-zookeeper.sh` | **ZooKeeper** — coordination distribuée | Aucune |
+| 2 | `start-dfs.sh` | **HDFS** — stockage distribué (NameNode + Datanodes) | Aucune |
+| 3 | `start-yarn.sh` | **YARN** — ordonnanceur de ressources (ResourceManager + NodeManagers) | HDFS |
+| 4 | `start-jobhistory.sh` | **MapReduce JobHistory** — historique des jobs MR | YARN + HDFS |
+| 5 | `start-hbase.sh` | **HBase** — base NoSQL (Master + RegionServers) | HDFS + ZooKeeper |
+| 6 | `start-thrift.sh` | **HBase Thrift** — passerelle Thrift pour HBase | HBase |
+| 7 | `start-rest.sh` | **HBase REST** — API REST pour HBase | HBase |
+| 8 | `start-hive.sh` | **HiveServer2** — SQL sur HDFS (Metastore Derby embarqué) | HDFS + YARN |
+
+> Utilisez `start-all.sh` pour tout lancer en une commande.
+>
+> Pour arrêter les services, utilisez `pkill -f <service>` depuis le master,
+> puis `docker compose down` sur l'hôte.
+
+### Hive en bref
+
+- Connexion depuis le master : `beeline -u jdbc:hive2://localhost:10000`
+- Le Metastore Derby se crée dans `/home/metastore_db` au premier lancement — **une seule session à la fois** (verrou Derby) ;
+- Logs : `/home/hiveserver2.log` ; UI web : port `10002`.
+

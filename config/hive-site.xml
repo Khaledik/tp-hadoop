@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+<configuration>
+    <!-- Metastore embarqué (Derby) : suffisant pour un cluster d'apprentissage,
+         une session à la fois (cf. cours CRS/05). La base vit dans le
+         sous-répertoire metastore_db/ du volume /home/metastore_db — Derby
+         (create=true) refuse de créer une base dans un répertoire préexistant
+         (erreur XBM0J), il doit donc créer lui-même son sous-dossier. -->
+    <property>
+        <name>javax.jdo.option.ConnectionURL</name>
+        <value>jdbc:derby:;databaseName=/home/metastore_db/metastore_db;create=true</value>
+    </property>
+    <property>
+        <name>javax.jdo.option.ConnectionDriverName</name>
+        <value>org.apache.derby.jdbc.EmbeddedDriver</value>
+    </property>
+
+    <!-- HDFS du cluster : les tables externes pointent dessus -->
+    <property>
+        <name>hive.metastore.warehouse.dir</name>
+        <value>/user/hive/warehouse</value>
+    </property>
+
+    <!-- Moteur d'exécution : MapReduce sur YARN (pédagogie séquence 04 -> 05,
+         le EXPLAIN doit montrer des stages Map/Reduce) -->
+    <property>
+        <name>hive.execution.engine</name>
+        <value>mr</value>
+    </property>
+
+    <!-- HiveServer2 : port JDBC (Beeline) + UI -->
+    <property>
+        <name>hive.server2.thrift.port</name>
+        <value>10000</value>
+    </property>
+    <property>
+        <name>hive.server2.webui.port</name>
+        <value>10002</value>
+    </property>
+    <property>
+        <name>hive.server2.enable.doAs</name>
+        <value>false</value>
+    </property>
+
+    <!-- Docker : résolution du Namenode par le nom du conteneur -->
+    <property>
+        <name>hive.server2.thrift.bind.host</name>
+        <value>0.0.0.0</value>
+    </property>
+
+    <!-- Heaps adaptées au cluster léger (master limité à 1.8g au total) -->
+    <property>
+        <name>hive.heapsize</name>
+        <value>192</value>
+    </property>
+    <property>
+        <name>hive.client.heapsize</name>
+        <value>192</value>
+    </property>
+</configuration>

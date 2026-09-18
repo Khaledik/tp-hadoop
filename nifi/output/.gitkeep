@@ -1,0 +1,7 @@
+# Sortie du flux NiFi (PutFile). Le meme dossier est monte dans le master
+# sous /home/staging, d'ou le relais direct vers `hdfs dfs -moveFromLocal`.
+#
+# Doit exister AVANT le premier `docker compose up -d` : cree par Docker, il
+# appartient a root et NiFi (utilisateur nifi) ne peut pas y ecrire -- PutFile
+# transfere alors tout sur `failure`, sans message evident.
+# Le contenu n'est pas versionne, seul ce marqueur l'est.
