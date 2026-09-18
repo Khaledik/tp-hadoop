@@ -125,12 +125,12 @@ soit :
 
 Le TP est documenté étape par étape dans les fichiers suivants :
 
-- [01 - Préparation de l'environnement](docs/01-preparation-environnement.md)
-- [02 - MapReduce](docs/02-mapreduce.md)
-- [03 - HBase](docs/03-hbase.md)
+- [01 - Préparation de l'environnement](docs/TP/01-preparation-environnement.md)
+- [02 - MapReduce](docs/TP/02-mapreduce.md)
+- [03 - HBase](docs/TP/03-hbase.md)
 - [04 - Visualisation](docs/04-visualisation.md)
-- [05 - Hive](docs/05-hive.md)
-- [06 - NiFi](docs/06-nifi.md)
+- [05 - Hive](docs/TP/05-hive.md)
+- [06 - NiFi](docs/TP/06-nifi.md)
 
 Chaque partie contient :
 
